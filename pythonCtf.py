@@ -6,7 +6,7 @@ import webcolors
 
 # Paramètres du serveur
 IP = "148.113.42.34"
-PORT = 57207
+PORT = 39120
 LOCAL_PORT = 33148
     
     
@@ -174,11 +174,13 @@ def connect_and_get_flag():
             
         #QUESTION7
         if "Quelle est la couleur pour les valeurs RGB" in response:
-            braille_decoded = braille(response)
-            client_socket.sendall(braille_decoded.encode())
-            print(f">> Réponse envoyée : {braille_decoded}")
+            rgb = rgb_color(response)
+            client_socket.sendall(rgb.encode())
+            print(f">> Réponse envoyée : {rgb}")
             response = client_socket.recv(1024).decode()
             print(f">> Réponse du serveur : {response}")
+            
+        
             
         client_socket.close()
         print(">> Closing...")
