@@ -6,10 +6,32 @@ import webcolors
 
 # Paramètres du serveur
 IP = "148.113.42.34"
-PORT = 39120
-LOCAL_PORT = 33148
+PORT = 37879
+LOCAL_PORT = 33152
     
     
+    
+# pour flag8
+def question(response):
+    code = re.findall(r"Question 8: Redonné moi la réponse de la question (\d+)", response)
+    if code:
+        number= code[0]
+        if number == "1":
+            return "Clement/Languedoc/3SI5"
+        elif number == "2":
+            return date.today().strftime("%d/%m")
+        elif number == "3":
+            return calc(response)
+        elif number == "4":
+            return decode_base64(response)
+        elif number == "5":
+            return morse(response)
+        elif number == "6":
+            return braille(response)
+        elif number == "7":
+            return rgb_color(response)
+    return ""
+
 #Pour flag3
 def calc(response):
     calcul = re.findall(r"(\d+)\s*([\+\-\*/])\s*(\d+)", response)
@@ -76,7 +98,7 @@ def decode_braille(hex_string):
         bytes_code = bytes.fromhex(hex_string)
         braille_code = bytes_code.decode('utf-8')
 
-        braille_translation = {
+        braille_dict = {
             '⠁': 'A', '⠃': 'B', '⠉': 'C', '⠙': 'D', '⠑': 'E',
             '⠋': 'F', '⠛': 'G', '⠓': 'H', '⠊': 'I', '⠚': 'J',
             '⠅': 'K', '⠇': 'L', '⠍': 'M', '⠝': 'N', '⠕': 'O',
@@ -85,7 +107,7 @@ def decode_braille(hex_string):
             '⠵': 'Z', ' ': ' '
         }
 
-        decoded_message = ''.join(braille_translation.get(char, '?') for char in braille_code).replace(' ', '')
+        decoded_message = ''.join(braille_dict.get(char, '?') for char in braille_code).replace(' ', '')
         return decoded_message.strip()
 
     except Exception as e:
@@ -108,6 +130,15 @@ def rgb_color(response):
         color_name = webcolors.rgb_to_name((int(r), int(g), int(b)))
         return color_name
     return ""
+
+
+
+# pour flag9
+def regex(response):
+    code  = re.findall(r"Pouvez-vous me donné la dernière lettre du mot (\w+)", response)
+    if code:
+        word = code[0]
+        return word[-1]
 
 def connect_and_get_flag():
     try:
@@ -177,6 +208,22 @@ def connect_and_get_flag():
             rgb = rgb_color(response)
             client_socket.sendall(rgb.encode())
             print(f">> Réponse envoyée : {rgb}")
+            response = client_socket.recv(1024).decode()
+            print(f">> Réponse du serveur : {response}")
+        
+        #QUESTION8    
+        if "Question 8: Redonné moi la réponse de la question" in response:
+            rep_qst = question(response)
+            client_socket.sendall(str(rep_qst).encode())  
+            print(f">> Réponse envoyée : {rep_qst}")
+            response = client_socket.recv(1024).decode()
+            print(f">> Réponse du serveur : {response}")
+            
+        #QUESTION9   
+        if "Pouvez-vous me donné la dernière lettre du" in response:
+            reg=regex(response)
+            client_socket.sendall(reg.encode())  
+            print(f">> Réponse envoyée : {reg}")
             response = client_socket.recv(1024).decode()
             print(f">> Réponse du serveur : {response}")
             
